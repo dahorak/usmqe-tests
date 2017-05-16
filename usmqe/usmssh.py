@@ -4,11 +4,7 @@ Module for establishing remote ssh connection.
 .. moduleauthor:: dahorak (inspired by aloganat's module)
 
 Usage::
-
-    # configure SSH keyfile (once in e.g. run.py)
-    # default set to ~/.ssh/id_rsa
     import usmssh
-    usmssh.KEYFILE = "/path/to/id_rsa"
 
     # ...use SSH connection in any module...
     # and close all open ssh connections at the end
@@ -28,7 +24,6 @@ import pytest
 
 
 LOGGER = pytest.get_logger("ssh", module=True)
-KEYFILE = "~/.ssh/id_rsa"
 __SSH = None
 
 
@@ -73,7 +68,6 @@ class RemoteConnection(object):
     def __init__(self, node, user='root'):
         """
         Initializes and establishes connection for one user to one host.
-        It excepts properly configured KEYFILE variable.
 
         Parameters:
           * node - hostname
@@ -81,17 +75,16 @@ class RemoteConnection(object):
         """
         self.node = node
         self.user = user
-        self.keyfile = KEYFILE
         self.establish_connection(
-            self.node, user=self.user, keyfile=self.keyfile)
+            self.node, user=self.user)
 
-    def establish_connection(self, node, user='root', keyfile=None):
+    def establish_connection(self, node, user='root'):
         """
         Establishes connection from localhost to node via plumbum.SshMachine.
         """
         try:
             self.ssh = plumbum.SshMachine(
-                node, user, keyfile=os.path.expanduser(keyfile),
+                node, user,
                 ssh_opts=('-o StrictHostKeyChecking=no',),
                 scp_opts=('-o StrictHostKeyChecking=no',))
             self.session = self.ssh.session()
